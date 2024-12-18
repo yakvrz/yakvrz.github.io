@@ -170,14 +170,10 @@
             const color = getColorTemp();
             const baseOpacity = Math.max(0, 1 - globalPowerStrain);
             
-            gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, 
-                ${(intensity1 * 0.45 + surge * 0.3) * depthScale * baseOpacity})`);
-            gradient.addColorStop(0.45, `rgba(${color.r}, ${color.g}, ${color.b}, 
-                ${((intensity1 + intensity2) * 0.15 + surge * 0.2) * depthScale * baseOpacity})`);
-            gradient.addColorStop(0.55, `rgba(${color.r}, ${color.g}, ${color.b}, 
-                ${((intensity1 + intensity2) * 0.15 + surge * 0.2) * depthScale * baseOpacity})`);
-            gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 
-                ${(intensity2 * 0.45 + surge * 0.3) * depthScale * baseOpacity})`);
+            gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${(intensity1 * 0.45 + surge * 0.3) * depthScale * baseOpacity})`);
+            gradient.addColorStop(0.45, `rgba(${color.r}, ${color.g}, ${color.b}, ${((intensity1 + intensity2) * 0.15 + surge * 0.2) * depthScale * baseOpacity})`);
+            gradient.addColorStop(0.55, `rgba(${color.r}, ${color.g}, ${color.b}, ${((intensity1 + intensity2) * 0.15 + surge * 0.2) * depthScale * baseOpacity})`);
+            gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, ${(intensity2 * 0.45 + surge * 0.3) * depthScale * baseOpacity})`);
             
             return gradient;
         }
