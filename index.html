@@ -3,95 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hey</title>
+    <title>.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: monospace;
-            max-width: 650px;
-            margin: 40px auto;
-            padding: 0 20px;
-            line-height: 1.6;
-            font-size: 16px;
-            background: #111;
-            color: #ddd;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #000;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
         }
 
-        a {
-            color: #58a6ff;
-            text-decoration: none;
+        .hypercube {
+            position: relative;
+            width: 1000px;
+            height: 1000px;
+            margin-bottom: 25px;
         }
 
-        a:hover {
-            text-decoration: underline;
+        canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            image-rendering: crisp-edges;
         }
 
         .links {
-            margin-top: 30px;
+            display: flex;
+            gap: 25px;
+            position: relative;
+            z-index: 2;
         }
 
         .links a {
-            margin-right: 15px;
+            color: rgb(255, 252, 245);
+            text-decoration: none;
+            font-size: 1.1rem;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+            font-weight: 300;
         }
 
-        hr {
-            border: none;
-            border-top: 1px solid #333;
-            margin: 20px 0;
-            width: 100%;
-        }
-
-        .spiral {
-            font-family: monospace;
-            white-space: pre;
-            animation: rotate 8s linear infinite;
-            margin: 40px 0;
-        }
-
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .content {
-            text-align: center;
+        .links a:hover {
+            opacity: 1;
+            text-shadow: 0 0 15px rgba(255, 252, 245, 0.5);
+            letter-spacing: 2px;
         }
     </style>
 </head>
 <body>
-    <div class="content">
-        <h1>sup</h1>
-        
-        <pre class="spiral">
-      @@@@@@@@
-    @@@@@@@@@@@@
-  @@@@@@    @@@@@@
- @@@@@        @@@@@
-@@@@@          @@@@@
-@@@@@          @@@@@
-@@@@@          @@@@@
- @@@@@        @@@@@
-  @@@@@@    @@@@@@
-    @@@@@@@@@@@@
-      @@@@@@@@</pre>
-
-        <p>
-            <->
-        </p>
-
-        <hr>
-
-        <div class="links">
-            <a href="https://github.com/YOUR_USERNAME">github</a>
-            <a href="mailto:your.email@example.com">email</a>
-        </div>
+    <div class="hypercube">
+        <canvas id="canvas" width="1000" height="1000"></canvas>
     </div>
 
+    <div class="links">
+        <a href="https://github.com/yakvrz">github</a>
+        <a href="mailto:yakvrz@gmail.com">email</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { alpha: true });
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // Define vertices of a 4D hypercube
+        const vertices = [];
+        for(let x = -1; x <= 1; x += 2) {
+            for(let y = -1; y <= 1; y += 2) {
+                for(let z = -1; z <= 1; z += 2) {
+                    for(let w = -1; w <= 1; w += 2) {
+                        vertices.push([x, y, z, w]);
+                    }
+                }
+            }
+        }
+
+        // Define edges
+        const edges = [];
+        for(let i = 0; i < vertices.length; i++) {
+            for(let j = i + 1; j < vertices.length; j++) {
+                let diffCount = 0;
+                for(let k = 0; k < 4; k++) {
+                    if(vertices[i][k] !== vertices[j][k]) diffCount++;
+                }
+                if(diffCount === 1) edges.push([i, j]);
+            }
+        }
+
+        // States for both core functionality and electrical effects
+        const vertexStates = new Array(vertices.length).fill(1);
+        const vertexFlickerTimers = new Array(vertices.length).fill(0);
+        const vertexIntensities = new Array(vertices.length).fill(1);
+        const powerSurges = new Array(edges.length).fill(0);
+        const warmingUp = new Array(vertices.length).fill(1);
+        const vertexNoise = new Array(vertices.length).fill(1);
+        let globalPowerStrain = 0;
+
+// Electrical simulation functions
+        function getColorTemp(base = 255, vertex = false) {
+            const time = Date.now() / 5000;
+            const warmth = vertex ? Math.sin(time) * 2 : Math.sin(time) * 3;
+            return {
+                r: base,
+                g: base - warmth,
+                b: base - warmth * 2
+            };
+        }
+
+        function updateElectricalEffects() {
+            // Random power surges
+            if (Math.random() < 0.005) {
+                const startEdge = Math.floor(Math.random() * edges.length);
+                powerSurges[startEdge] = 1;
+            }
+
+            // Update surges
+            powerSurges.forEach((surge, i) => {
+                if (surge > 0) {
+                    powerSurges[i] -= 0.02;
+                    edges.forEach((edge, j) => {
+                        if (edges[i].some(v => edge.includes(v)) && Math.random() < 0.2) {
+                            powerSurges[j] = Math.max(powerSurges[j], surge - 0.1);
+                        }
+                    });
+                }
+            });
+
+            // Update vertex noise and warm-up
+            vertices.forEach((_, i) => {
+                if (vertexStates[i] === 1) {
+                    warmingUp[i] = Math.min(1, warmingUp[i] + 0.05);
+                    if (warmingUp[i] < 0.8 && Math.random() < 0.1) {
+                        warmingUp[i] -= 0.1;
+                    }
+                } else {
+                    warmingUp[i] = Math.max(0, warmingUp[i] - 0.1);
+                }
+                
+                vertexNoise[i] = 0.95 + Math.random() * 0.1;
+            });
+
+            // Global power strain
+            const litVertices = vertexStates.filter(s => s > 0.5).length;
+            globalPowerStrain = Math.max(0, (litVertices - 12) / 4) * 0.3;
+            
+            if (globalPowerStrain > 0 && Math.random() < globalPowerStrain) {
+                const randomVertex = Math.floor(Math.random() * vertices.length);
+                vertexStates[randomVertex] *= 0.95;
+            }
+        }
+
+        function createGradient(x1, y1, x2, y2, intensity1, intensity2, depthScale) {
+            const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+            const edgeIndex = edges.findIndex(e => 
+                (e[0] === x1 && e[1] === x2) || (e[0] === x2 && e[1] === x1));
+            const surge = edgeIndex >= 0 ? powerSurges[edgeIndex] : 0;
+            
+            const color = getColorTemp();
+            const baseOpacity = Math.max(0, 1 - globalPowerStrain);
+            
+            gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, 
+                ${(intensity1 * 0.45 + surge * 0.3) * depthScale * baseOpacity})`);
+            gradient.addColorStop(0.45, `rgba(${color.r}, ${color.g}, ${color.b}, 
+                ${((intensity1 + intensity2) * 0.15 + surge * 0.2) * depthScale * baseOpacity})`);
+            gradient.addColorStop(0.55, `rgba(${color.r}, ${color.g}, ${color.b}, 
+                ${((intensity1 + intensity2) * 0.15 + surge * 0.2) * depthScale * baseOpacity})`);
+            gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 
+                ${(intensity2 * 0.45 + surge * 0.3) * depthScale * baseOpacity})`);
+            
+            return gradient;
+        }
+
+        function drawGlowingSphere(x, y, radius, intensity, depthScale, vertexIndex) {
+            const warmup = warmingUp[vertexIndex];
+            const noise = vertexNoise[vertexIndex];
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius * depthScale);
+            
+            const color = getColorTemp(255, true);
+            const finalIntensity = intensity * warmup * noise * (1 - globalPowerStrain);
+            
+            gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${finalIntensity * depthScale})`);
+            gradient.addColorStop(0.2, `rgba(${color.r}, ${color.g}, ${color.b}, ${finalIntensity * 0.9 * depthScale})`);
+            gradient.addColorStop(0.4, `rgba(${color.r}, ${color.g}, ${color.b}, ${finalIntensity * 0.5 * depthScale})`);
+            gradient.addColorStop(0.7, `rgba(${color.r}, ${color.g}, ${color.b}, ${finalIntensity * 0.2 * depthScale})`);
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            return gradient;
+        }
+
+        function rotatePoint(point, angle1, angle2, angle3) {
+            let [x, y, z, w] = point;
+            
+            let x1 = x * Math.cos(angle1) - y * Math.sin(angle1);
+            let y1 = x * Math.sin(angle1) + y * Math.cos(angle1);
+            
+            let x2 = x1 * Math.cos(angle2) - z * Math.sin(angle2);
+            let z1 = x1 * Math.sin(angle2) + z * Math.cos(angle2);
+            
+            let x3 = x2 * Math.cos(angle3) - w * Math.sin(angle3);
+            let w1 = x2 * Math.sin(angle3) + w * Math.cos(angle3);
+            
+            return [x3, y1, z1, w1];
+        }
+
+        function project(point) {
+            let [x, y, z, w] = point;
+            let factor = 1 / (4 - w);
+            let scale = 250;
+            return [
+                x * factor * scale + canvas.width / 2,
+                y * factor * scale + canvas.height / 2,
+                z * factor,
+                w,
+                factor
+            ];
+        }
+function updateFlickerStates() {
+            vertices.forEach((_, i) => {
+                if (Math.random() < 0.0008) {
+                    vertexFlickerTimers[i] = Math.random() * 150;
+                    warmingUp[i] = 0;
+                }
+                
+                if (vertexFlickerTimers[i] > 0) {
+                    vertexFlickerTimers[i]--;
+                    vertexStates[i] = Math.random() < 0.5 ? 0.1 : 1;
+                    vertexIntensities[i] = 0.2 + Math.random() * 0.8;
+                } else {
+                    vertexStates[i] = 1;
+                    vertexIntensities[i] = 1;
+                }
+
+                if (Math.random() < 0.00008) {
+                    vertexStates[i] = 0;
+                    warmingUp[i] = 0;
+                }
+            });
+        }
+
+        let angle1 = 0, angle2 = 0, angle3 = 0;
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            updateFlickerStates();
+            updateElectricalEffects();
+            
+            const projected = vertices.map(v => 
+                project(rotatePoint(v, angle1, angle2, angle3))
+            );
+
+            const sortedEdges = [...edges].sort(([i1, j1], [i2, j2]) => {
+                const depth1 = (projected[i1][2] + projected[j1][2]) / 2;
+                const depth2 = (projected[i2][2] + projected[j2][2]) / 2;
+                return depth2 - depth1;
+            });
+
+            // Draw edges
+            sortedEdges.forEach(([i, j], edgeIndex) => {
+                const [x1, y1, z1, w1, scale1] = projected[i];
+                const [x2, y2, z2, w2, scale2] = projected[j];
+                
+                const avgDepth = (z1 + z2) / 2;
+                const depthScale = Math.max(0.2, (avgDepth + 1.5) / 2.5);
+                
+                const intensity1 = vertexStates[i] * vertexIntensities[i];
+                const intensity2 = vertexStates[j] * vertexIntensities[j];
+                
+                const surge = powerSurges[edgeIndex];
+                
+                ctx.shadowBlur = (10 + surge * 5) * depthScale;
+                ctx.shadowColor = `rgba(255, 255, 255, ${Math.max(intensity1, intensity2) * 0.25 * depthScale})`;
+                ctx.lineWidth = (2.5 + surge) * depthScale;
+                
+                ctx.beginPath();
+                ctx.strokeStyle = createGradient(x1, y1, x2, y2, intensity1, intensity2, depthScale);
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            });
+            
+            const sortedVertices = projected.map((p, i) => ({p, i}))
+                .sort((a, b) => b.p[2] - a.p[2]);
+
+            // Draw vertices
+            sortedVertices.forEach(({p: [x, y, z, w, depthFactor], i}) => {
+                const depthScale = Math.max(0.2, (z + 1.5) / 2.5);
+                const state = vertexStates[i];
+                const intensity = vertexIntensities[i];
+                
+                if (state > 0) {
+                    // Large outer glow
+                    ctx.beginPath();
+                    ctx.fillStyle = drawGlowingSphere(x, y, 15, state * intensity * 0.5, depthScale, i);
+                    ctx.arc(x, y, 15 * depthScale, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Medium glow
+                    ctx.beginPath();
+                    ctx.fillStyle = drawGlowingSphere(x, y, 8, state * intensity * 0.8, depthScale, i);
+                    ctx.arc(x, y, 8 * depthScale, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Core with noise
+                    const noise = vertexNoise[i];
+                    const color = getColorTemp(255, true);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2 * depthScale * noise, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${state * depthScale * warmingUp[i]})`;
+                    ctx.fill();
+                }
+            });
+            
+            angle1 += 0.001;
+            angle2 += 0.0015;
+            angle3 += 0.002;
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
 </body>
 </html>
